@@ -1,0 +1,48 @@
+# CONFIGURANDO BANCO DE DADOS MASTER
+sudo apt-get vim
+sudo apt-get install mariadb-server
+
+vim /etc/mysql/mariadb.conf.d/50-server.cnf
+
+#usar ?server-id para achar o que deve ser descomentado, descomentar
+server-id = 1
+#descomentar e modificar o caminho caso necessário. salvar e sair usando :wq
+log-bin = /var/lib/mysql/aria_log.000002
+
+#reiniciar o mariadb para salvar as alterações
+sudo systemctl restart mariadb
+
+#entrar no mariadb
+mariadb
+#criar o usuário do master
+CREATE USER 'replication_user'@'%' IDENTIFIED BY '123';
+GRANT REPLICATION SLAVE ON *.* TO 'replication_user'@'%';
+#salvar as informações de FILE e POSITION para configurar o slave
+SHOW MASTER STATUS;
+
+
+
+# CONFIGURANDO BANCO DE DADOS SLAVE
+sudo apt-get install vim
+sudo apt-get install mariadb-server
+
+vim /etc/mysql/mariadb.conf.d/50-server.cnf
+#use ?server-id para achar o que deve ser alterado, alterar o server-id para 2, deve ser diferente do server-id do master. salvar usando :wq 
+server-id = 2 
+
+#reiniciar o mariadb para salvar as alterações
+sudo systemctl restart mariadb
+
+#insira nas linhas de comando do mariadb para salvar o usuário do master
+CHANGE MASTER TO
+  MASTER_HOST = 'endereco_ip_servidor_mestre',
+  MASTER_USER = 'replication_user',
+  MASTER_PASSWORD = '123', 
+  MASTER_LOG_FILE = 'aria_log.000002', #colocar o valor contido no file salvado anteriormente, trocar se necessário
+  MASTER_LOG_POS = 667; #colocar o valor contido em position salvo anteriormente, trocar se necessário
+
+#iniciar o slave
+START SLAVE;
+
+#verificar se o slave se conectou ao master, Slave_IO_Running" e "Slave_SQL_Running deve estar com o status yes
+SHOW SLAVE STATUS\G;
