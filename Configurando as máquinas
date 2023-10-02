@@ -1,0 +1,17 @@
+#É necessário que as maquinas estejam na mesma rede
+apt-get upgrade
+apt-get update
+vim /etc/network/interfaces
+
+#master
+auto enp0s8
+iface enp0s8 inet static
+address 10.0.0.2
+netmask 255.255.255.0
+
+#slave
+auto enp0s8
+iface enp0s8 inet static
+address 10.0.0.3
+netmask 255.255.255.0
+gateway 10.0.0.2
