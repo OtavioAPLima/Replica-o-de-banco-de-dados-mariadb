@@ -1,0 +1,71 @@
+#criando o banco de dados no master, será replicado automaticamente no slave
+CREATE OR REPLACE DATABASE primeira_prova;
+
+USE primeira_prova;
+
+CREATE OR REPLACE TABLE Aluno(
+  Codigo SMALLINT unsigned NOT NULL AUTO_INCREMENT,
+  Nome VARCHAR(52) NOT NULL,
+  unique key uq_Aluno(Nome),
+  PRIMARY KEY(Codigo));
+
+CREATE OR REPLACE TABLE Professor(
+  Codigo SMALLINT unsigned NOT NULL AUTO_INCREMENT,
+  Nome varchar(52) NOT NULL,
+  PRIMARY KEY(Codigo));
+
+CREATE OR REPLACE TABLE Materia(
+  Codigo SMALLINT unsigned NOT NULL AUTO_INCREMENT,
+  Nome VARCHAR(52) NOT NULL,
+  Percentual float,
+  PRIMARY KEY(Codigo));
+
+CREATE OR REPLACE TABLE Escola(
+  Codigo SMALLINT unsigned NOT NULL AUTO_INCREMENT,
+  Nome VARCHAR(52) NOT NULL,
+  Codigo_do_Aluno SMALLINT unsigned NOT NULL,
+  Codigo_do_Professor SMALLINT unsigned NOT NULL,
+  Codigo_da_Materia SMALLINT unsigned NOT NULL,
+  PRIMARY KEY(Codigo),
+  CONSTRAINT fk_Codigo_Aluno FOREIGN KEY (Codigo_do_Aluno) REFERENCES Aluno(Codigo),
+  CONSTRAINT fk_Codigo_Professor FOREIGN KEY (Codigo_do_Professor) REFERENCES Professor(Codigo),
+  CONSTRAINT fk_Codigo_Materia FOREIGN KEY (Codigo_da_Materia) REFERENCES Materia(Codigo));
+
+CREATE OR REPLACE TABLE Prova(
+  Codigo SMALLINT unsigned NOT NULL AUTO_INCREMENT,
+  Descricao VARCHAR(100) NOT NULL,
+  Nota SMALLINT unsigned NOT NULL,
+  Codigo_do_Professor SMALLINT unsigned NOT NULL,
+  PRIMARY KEY (Codigo),
+  FOREIGN KEY (Codigo_do_Professor) REFERENCES Professor (Codigo));
+
+CREATE OR REPLACE TABLE Media_Final(
+  Codigo SMALLINT unsigned NOT NULL AUTO_INCREMENT,
+  Numero SMALLINT unsigned NOT NULL,
+  Data_de_Prova date NOT NULL,
+  Data_de_Trabalho_Final date NOT NULL,
+  Codigo_da_Prova SMALLINT unsigned NOT NULL,
+  CONSTRAINT fk_Codigo_Prova FOREIGN KEY (Codigo_da_Prova) REFERENCES Prova(Codigo),
+  PRIMARY KEY(Codigo));
+
+
+#Inserindo dados na tabela
+INSERT INTO primeira_prova.Aluno(Codigo, Nome) VALUES (00001, 'Otavio');
+INSERT INTO primeira_prova.Aluno(Codigo, Nome) VALUES (00002, 'Ana');
+
+#Criando usuários
+CREATE OR REPLACE USER ana@localhost IDENTIFIED BY '12345678';
+CREATE OR REPLACE USER otavio@localhost IDENTIFIED BY '87654321';
+
+#Criando grupos de usuarios
+CREATE ROLE Professor;
+CREATE ROLE Admnistrador;
+
+#Dando permissões aos grupos
+GRANT ALL ON primeira_prova.* TO Admnistrador WITH GRANT OPTION;
+GRANT INSERT, UPDATE, SELECT ON primeira_prova.Nota TO Professor;
+GRANT INSERT, UPDATE, SELECT ON primeira_prova.Prova TO Professor;
+GRANT INSERT, SELECT ON primeira_prova.Media_Final TO Professor;
+
+#Checando os dados
+SELECT * FROM Aluno;
