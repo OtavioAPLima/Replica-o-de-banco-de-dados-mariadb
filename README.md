@@ -1,4 +1,4 @@
-# Replica-o-de-banco-de-dados-mariadb
+# Replicacao-de-banco-de-dados-mariadb-Debian12
 #Primeiro
 Configurando as máquinas
 #Segundo
